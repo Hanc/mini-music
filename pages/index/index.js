@@ -1,54 +1,140 @@
-// index.js
-// 获取应用实例
-const app = getApp()
-
+// poages/index/index.js
 Page({
+
+  /**
+   * 页面的初始数据
+   */
   data: {
-    motto: 'Hello World',
+    swiperImgUrls: [],
+    Personalized: [],
+    topList: [],
     userInfo: {},
-    hasUserInfo: false,
-    canIUse: wx.canIUse('button.open-type.getUserInfo')
   },
-  // 事件处理函数
-  bindViewTap() {
-    wx.navigateTo({
-      url: '../logs/logs'
-    })
+
+  /**
+   * 生命周期函数--监听页面加载
+   */
+  onLoad: function (options) {
+    this.getSwiper();
+    this.getPersonalized();
+    this.getTopList();
+    console.log(this.data);
   },
-  onLoad() {
-    if (app.globalData.userInfo) {
+
+  //获取用户信息的回调
+  handleGetUserInfo(res) {
+    console.log(res);
+    if (res.detail.userInfo) {
       this.setData({
-        userInfo: app.globalData.userInfo,
-        hasUserInfo: true
-      })
-    } else if (this.data.canIUse) {
-      // 由于 getUserInfo 是网络请求，可能会在 Page.onLoad 之后才返回
-      // 所以此处加入 callback 以防止这种情况
-      app.userInfoReadyCallback = res => {
-        this.setData({
-          userInfo: res.userInfo,
-          hasUserInfo: true
-        })
-      }
-    } else {
-      // 在没有 open-type=getUserInfo 版本的兼容处理
-      wx.getUserInfo({
-        success: res => {
-          app.globalData.userInfo = res.userInfo
-          this.setData({
-            userInfo: res.userInfo,
-            hasUserInfo: true
-          })
-        }
+        userInfo: res.detail.userInfo
       })
     }
   },
-  getUserInfo(e) {
-    console.log(e)
-    app.globalData.userInfo = e.detail.userInfo
-    this.setData({
-      userInfo: e.detail.userInfo,
-      hasUserInfo: true
+
+  /**
+   * 生命周期函数--监听页面初次渲染完成
+   */
+  onReady: function () {
+
+  },
+
+  /**
+   * 生命周期函数--监听页面显示
+   */
+  onShow: function () {
+
+  },
+
+  /**
+   * 生命周期函数--监听页面隐藏
+   */
+  onHide: function () {
+
+  },
+
+  /**
+   * 生命周期函数--监听页面卸载
+   */
+  onUnload: function () {
+
+  },
+
+  /**
+   * 页面相关事件处理函数--监听用户下拉动作
+   */
+  onPullDownRefresh: function () {
+
+  },
+
+  /**
+   * 页面上拉触底事件的处理函数
+   */
+  onReachBottom: function () {
+
+  },
+
+  /**
+   * 用户点击右上角分享
+   */
+  onShareAppMessage: function () {
+
+  },
+
+  getSwiper(){
+    const app = getApp();
+    let url = '/banner';
+    let data = {
+      type: 2
+    };
+    app.wxRequest('GET', url, data, (res) => {
+      this.setData({
+        swiperImgUrls : res.banners
+      })
+      console.log(res)
+    }, (err) => {
+      console.log(err)
     })
-  }
+  },
+
+  getPersonalized(){
+    const app = getApp();
+    let url = '/personalized';
+    let data = {
+      limit: 10
+    };
+    app.wxRequest('GET', url, data, (res) => {
+      this.setData({
+        Personalized : res.result
+      })
+      console.log(res)
+    }, (err) => {
+      console.log(err)
+    });
+  },
+
+  getTopList(){
+    const app = getApp();
+    let url = '/playlist/detail';
+    let result = [];
+    let data = {
+      id: 24381616
+    };
+    for(let i = 0; i < 3; i++){
+      app.wxRequest('GET', url, data, (res) => {
+        let topListItem = {
+          name: res.playlist.name,
+          tracks: res.playlist.tracks.slice(0, 3)
+        }
+        result.push(topListItem);
+        this.setData({
+          topList : result
+        });
+      }, (err) => {
+        console.log(err)
+      });
+      data.id--;
+    }
+  
+ 
+  },
 })
